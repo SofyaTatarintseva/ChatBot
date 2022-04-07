@@ -1,47 +1,42 @@
-import axios from 'axios';
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import { Chat } from "./components/Chat";
+import { initUserChat, initNewUserChat, readyEvent } from './apiChat'
 
 export function App() {
   const [isOpenChat, setOpenChat] = useState(false);
-  const [isNewSession, setNewSession] = useState(() => {
-    const saved = localStorage.getItem("isNewSession");
-    if (saved === null) {
-      return true
-    } else {
-      return saved === 'true' ? true : false 
-    }
+  const [cuid, setCuid] = useState(() => {
+    return localStorage.getItem("cuid") || '';
   });
-  const [cuid, setCuid] = useState('');
+  const [dialog, setDialog] = useState(() => {
+    const saved = localStorage.getItem("dialog");
+    const initialValue = JSON.parse(saved);
+    return initialValue || [];
+  });
   const uuid = '772c9859-4dd3-4a0d-b87d-d76b9f43cfa4';
+  const euid = '00b2fcbe-f27f-437b-a0d5-91072d840ed3';
 
-  //При изменениии состояния сессии, записываем состояние bool isNewSession
+
+  //При изменениии состояния диалога, записываем состояние в хранилище
   useEffect(() => {
-    localStorage.setItem("isNewSession", isNewSession.toString());
-  }, [isNewSession]);
+    localStorage.setItem("dialog", JSON.stringify(dialog));
+  }, [dialog]);
 
-  //Инициализация чата(получение cuid)
-  useEffect(async() => {
-    if (isNewSession) {
-      setCuid(await getCuid())
-    }
-  }, []);
-
-  // Если сессия новая , получаем cuid и меняем состояние сессии 
+  // Инициализация чата(получение cuid)
   useEffect(async () => {
-    if (isNewSession && isOpenChat) {
-      setCuid(await getCuid())
-      setNewSession(false)
+    if (!cuid) {
+      let cuidVal = await initNewUserChat({ "uuid": uuid })
+      setCuid(cuidVal)
+      setDialog([await readyEvent({ 'cuid': cuidVal, 'euid': euid })])
     }
-  }, [isNewSession])
+  }, [cuid])
 
-  // Если открываем чат, меняем состояние сессии
-  useEffect( () => {
-     if (isOpenChat) {
-      setNewSession(false)
+  // Инициализация чата(при перезагрузке страницы)
+  useEffect(() => {
+    if(cuid) {
+      initUserChat({'uuid': uuid, 'cuid': cuid})
     }
-  }, [isOpenChat])
+  }, [])
 
   // Переключение состояния чата с открыто/закрыто
   function changeStateChat() {
@@ -49,24 +44,8 @@ export function App() {
   }
 
   // Устанавливаем новую сессию
-  async function clearDialog() {
-    setNewSession(true)
-  }
-  
-  async function getCuid() {
-    try {
-      let res = await axios.post('https://biz.nanosemantics.ru/api/2.1/json/Chat.init', { "uuid": uuid })
-      if (res.status === 200) {
-        localStorage.setItem('cuid', res.data.result.cuid.toString())
-        res = await axios.post('https://biz.nanosemantics.ru/api/2.1/json/Chat.init', { "uuid": uuid, 'cuid': res.data.result.cuid.toString() })
-        if (res.status === 200) {
-          return res.data.result.cuid.toString()
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    }
-
+  function clearDialog() {
+    setCuid('')
   }
 
   return (
@@ -76,7 +55,7 @@ export function App() {
       </div>
       <div className="app-right-column">
         <div className="app-right-column_content">
-          {isOpenChat ? <Chat cuid={cuid} clearDialog={clearDialog} isNewSession={isNewSession}/> : null}
+          {isOpenChat ? <Chat dialog={dialog} clearDialog={clearDialog} setDialog={setDialog} /> : null}
         </div>
         <div className="app-right-column_btn">
           <button className="btn-chat" onClick={changeStateChat}> {isOpenChat ? 'Закрыть' : 'Открыть'}</button>
@@ -85,5 +64,3 @@ export function App() {
     </div>
   );
 }
-
-
