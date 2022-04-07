@@ -1,6 +1,5 @@
-import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
-
+import { getAnswer } from '../apiChat'
 
 export function ChatFooter(props) {
   const [question, setQuestion] = useState('');
@@ -35,13 +34,9 @@ export function ChatFooter(props) {
       refQuestion.current.value = ''
       setQuestion('')
       try {
-        let res = await axios.post('https://biz.nanosemantics.ru/api/bat/nkd/json/Chat.request', { 'cuid': cuid, 'text': question })
-        if (res.status === 200) {
-          props.getDialogComplite({
-            bot: true,
-            text: res.data.result.text.value
-          })
-        }
+        let res = await getAnswer({ 'cuid': cuid, 'text': question })
+        props.getDialogComplite(res)
+        
       } catch (e) {
         console.error(e)
       }
