@@ -60,6 +60,7 @@ h2 {
 .chat {
   height: 100%;
   max-width: 400px;
+  width: 250px;
   min-width: 250px;
   background: var(--white-color);
   box-sizing: border-box;
@@ -106,6 +107,8 @@ h2 {
   align-items: center;
   justify-content: center;
   display: flex;
+  white-space: pre-line;
+  flex-direction: column;
 }
 .chat-main-dialog {
   display: flex;
@@ -128,7 +131,6 @@ h2 {
 .btn:hover {
   background: var(--grey-color);
   color: var(--light-blue-bg-color);
-  border: 1px solid var( --grey-color);
   box-sizing: border-box;
   border-radius: 10px;
 }
