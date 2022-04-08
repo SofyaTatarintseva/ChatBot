@@ -9,7 +9,6 @@ export function ChatDialogUser(props) {
   )
 }
 export function ChatDialogBot(props) {
-
   function handleClick(e) {
     e.preventDefault();
     props.changeTextQuestion('LTE')
@@ -38,13 +37,13 @@ export function ChatDialogBot(props) {
 }
 
 export function ChatDialog(props) {
-  const role = props.dialog.map((el, index) => {
+  const allDialog = props.dialog.map((el, index) => {
     return el.user ? <ChatDialogUser text={el.text} key={index} /> : <ChatDialogBot changeTextQuestion={props.changeTextQuestion} text={el.text} key={index} />
   })
 
   return (
     <div className='chat-main'>
-      {role}
+      {allDialog}
     </div>
   );
 }
