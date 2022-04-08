@@ -3,11 +3,9 @@ import { getAnswer } from '../apiChat'
 
 export function ChatFooter(props) {
   const [question, setQuestion] = useState('');
-  const refQuestion = useRef();
 
   useEffect(() => {
     if (props.changeInputValue) {
-      refQuestion.current.value = props.changeInputValue
       setQuestion(props.changeInputValue)
     }
   }, [props.changeInputValue])
@@ -31,7 +29,6 @@ export function ChatFooter(props) {
         text: question
       })
       const cuid = localStorage.getItem('cuid')
-      refQuestion.current.value = ''
       setQuestion('')
       try {
         let res = await getAnswer({ 'cuid': cuid, 'text': question })
@@ -46,7 +43,7 @@ export function ChatFooter(props) {
 
   return (
     <div className='chat-footer'>
-      <input className='input-text' id='input2' ref={refQuestion} type='text' onChange={changeQuestion} onKeyPress={handleKeyPress} placeholder='Введите сообщение' />
+      <input value={question} className='input-text' type='text' onChange={changeQuestion} onKeyPress={handleKeyPress} placeholder='Введите сообщение' />
       <button className='btn' onClick={sendQuestion}> Отправить </button>
     </div>
   );
